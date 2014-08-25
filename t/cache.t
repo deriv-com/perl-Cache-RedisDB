@@ -7,6 +7,12 @@ use JSON qw(from_json);
 use Cache::RedisDB;
 
 my $cache = Cache::RedisDB->redis;
+
+plan( skip_all => 'Redis Server Not Found' ) unless $cache;
+plan( skip_all => "Test requires redis-server at least 1.2" ) unless $cache->version ge 1.003015;
+
+$cache->flushdb;
+
 isa_ok($cache, 'RedisDB', "RedisDB is used for cache");
 
 my $cache2 = Cache::RedisDB->redis;
@@ -95,7 +101,8 @@ subtest 'JSON' => sub {
     ok(!$json_obj->{should_be_false}, 'False is false');
 };
 
-is(Cache::RedisDB->flushall, 'OK', "Flushed DB");
+Cache::RedisDB::redis->flushdb;
+
 is(Cache::RedisDB->get("Test", "Num2"), undef, "Really flushed");
 
 done_testing;

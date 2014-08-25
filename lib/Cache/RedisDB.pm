@@ -49,11 +49,16 @@ Creates new connection to redis-server and returns corresponding RedisDB object.
 
 sub redis_connection {
     my ($server, $port) = split /:/, redis_server_info();
-    return RedisDB->new(
-        host               => $server,
-        port               => $port,
-        reconnect_attempts => 3,
-    );
+    my $redis;
+    eval {
+        $redis = RedisDB->new(
+            host               => $server,
+            port               => $port,
+            reconnect_attempts => 3
+        );
+    };
+    return if $@;
+    return $redis;
 }
 
 =head2 redis
