@@ -3,3 +3,8 @@ Revision history for Cache-RedisDB
 0.01    21/08/2014
         First version, released on an unsuspecting world.
 
+0.02    25/08/2014
+        Test case update
+
+0.03    27/08/2014
+        Issue solved where test was flushing the all user data. 
