@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
