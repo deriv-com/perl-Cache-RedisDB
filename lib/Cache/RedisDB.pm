@@ -3,7 +3,7 @@ package Cache::RedisDB;
 use 5.010;
 use strict;
 use warnings FATAL => 'all';
-
+use Carp;
 use RedisDB 2.14;
 use Sereal qw(looks_like_sereal);
 
@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -49,16 +49,14 @@ Creates new connection to redis-server and returns corresponding RedisDB object.
 
 sub redis_connection {
     my ($server, $port) = split /:/, redis_server_info();
-    my $redis;
-    eval {
-        $redis = RedisDB->new(
-            host               => $server,
-            port               => $port,
-            reconnect_attempts => 3
-        );
-    };
-    return if $@;
-    return $redis;
+    return RedisDB->new(
+        host               => $server,
+        port               => $port,
+        reconnect_attempts => 3,
+        on_connect_error   => sub {
+            confess "Cannot connect to server $server:$port";
+        }
+    );
 }
 
 =head2 redis

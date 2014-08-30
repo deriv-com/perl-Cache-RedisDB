@@ -7,4 +7,7 @@ Revision history for Cache-RedisDB
         Test case update
 
 0.03    27/08/2014
-        Issue solved where test was flushing the all user data. 
+        Issue solved where test was flushing the all user data.
+
+0.04    30/08/2014
+        Instead of eval use RedisDB feature to check fail test 
