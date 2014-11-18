@@ -21,7 +21,7 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -97,7 +97,7 @@ If I<$exptime> specified, it is expiration time in seconds.
 sub set {
     my ($self, $namespace, $key, $value, $exptime, $callback) = @_;
     if (not defined $value or ref $value or Encode::is_utf8($value)) {
-        state $encoder = Sereal::Encoder->new({freeze_callbacks => 1});
+        state $encoder = Sereal::Encoder->new({freeze_callbacks => 1, protocol_version => 2});
         $value = $encoder->encode($value);
     }
     if (defined $exptime) {
