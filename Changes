@@ -11,3 +11,6 @@ Revision history for Cache-RedisDB
 
 0.04    30/08/2014
         Instead of eval use RedisDB feature to check fail test 
+
+0.05    18/11/2014
+        Pinning encoding protocol to version 2.
