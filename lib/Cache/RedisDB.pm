@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.04
+Version 0.06
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
@@ -31,7 +31,7 @@ our $VERSION = '0.05';
 
 =head1 SUBROUTINES/METHODS
 
-=head2 redis_server_info 
+=head2 redis_server_info
 
 Returns redis host and port separated by colon
 
@@ -133,6 +133,18 @@ sub del {
     return redis->del(map { "${namespace}::$_" } @keys);
 }
 
+=head2 keys($namespace)
+
+Return a list of all known keys in the provided I<$namespace>.
+
+=cut
+
+sub keys {
+    my ($self, $namespace, @keys) = @_;
+    my $prefix = $namespace . '::';
+    return [map { s/^$prefix//; $_ } @{redis->keys($prefix . '*')}];
+}
+
 =head3 flushall
 
 Delete all keys and associated values from the cache.
@@ -184,9 +196,6 @@ L<http://cpanratings.perl.org/d/Cache-RedisDB>
 L<http://search.cpan.org/dist/Cache-RedisDB/>
 
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
 
 
 =head1 LICENSE AND COPYRIGHT

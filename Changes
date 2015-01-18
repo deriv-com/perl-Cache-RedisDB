@@ -10,7 +10,10 @@ Revision history for Cache-RedisDB
         Issue solved where test was flushing the all user data.
 
 0.04    30/08/2014
-        Instead of eval use RedisDB feature to check fail test 
+        Instead of eval use RedisDB feature to check fail test
 
 0.05    18/11/2014
         Pinning encoding protocol to version 2.
+
+0.06    18/01/2015
+        Add "keys" command for namespaces.

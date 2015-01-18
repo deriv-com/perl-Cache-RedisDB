@@ -9,19 +9,19 @@ use RedisServer;
 use Cache::RedisDB;
 
 my $server = RedisServer->start;
-plan( skip_all => "Can't start redis-server" ) unless $server;
+plan(skip_all => "Can't start redis-server") unless $server;
 
-$ENV{REDIS_CACHE_SERVER} = 'localhost:'.$server->{port};
+$ENV{REDIS_CACHE_SERVER} = 'localhost:' . $server->{port};
 
 my $cache = Cache::RedisDB->redis;
 
-plan( skip_all => 'Redis Server Not Found' ) unless $cache;
-plan( skip_all => "Test requires redis-server at least 1.2" ) unless $cache->version ge 1.003015;
+plan(skip_all => 'Redis Server Not Found') unless $cache;
+plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
 
 $cache->flushdb;
 
 isa_ok($cache, 'RedisDB', "RedisDB is used for cache");
-can_ok($cache,'flushall');
+can_ok($cache, 'flushall');
 
 my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
@@ -62,12 +62,14 @@ isa $new_cache, 'RedisDB';
 isnt $new_cache, $cache, "Got new cache object";
 
 is(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
+eq_or_diff(Cache::RedisDB->keys("Test"), ["key1"], "Got correct list for keys in Test namespace");
 is(Cache::RedisDB->del("Test", "key33", "key8", "key1"), 1, "Deleted Test::key1");
 is(Cache::RedisDB->get("Test", "key1"),     undef,                          "Got undef for Test::key1");
 is(Cache::RedisDB->get("",     "Testkey1"), "testvalue1",                   "Got testvalue1 for Testkey1");
 is(Cache::RedisDB->get("-",    "-"),        "-- it works! 它的工程！", "Got dash prefixed string");
 ok(Cache::RedisDB->set("Test", "Undef", undef), "Set undef");
 ok(Cache::RedisDB->set("Test", "Empty", ""),    "Set empty string");
+eq_or_diff(Cache::RedisDB->keys("Test"), ["Undef", "Empty"], "Got correct list for keys in Test namespace");
 is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
@@ -110,6 +112,7 @@ subtest 'JSON' => sub {
 };
 
 is(Cache::RedisDB->flushall, 'OK', "Flushed DB");
+eq_or_diff(Cache::RedisDB->keys("Test"), [], "Got empty list for keys in Test namespace");
 is(Cache::RedisDB->get("Test", "Num2"), undef, "Really flushed");
 
 done_testing;
