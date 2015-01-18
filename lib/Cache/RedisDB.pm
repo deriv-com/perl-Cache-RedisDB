@@ -186,9 +186,6 @@ L<http://search.cpan.org/dist/Cache-RedisDB/>
 =back
 
 
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2014 binary.com.
