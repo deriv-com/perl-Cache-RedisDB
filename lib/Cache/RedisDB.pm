@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 SYNOPSIS
 
@@ -143,6 +143,22 @@ sub keys {
     my ($self, $namespace) = @_;
     my $prefix = $namespace . '::';
     return [map { s/^$prefix//; $_ } @{redis->keys($prefix . '*')}];
+}
+
+=head2 ttl($namespace, $key)
+
+Return the Time To Live (in seconds) of a key in the provided I<$namespace>.
+
+=cut
+
+sub ttl {
+    my ($self, $namespace, $key) = @_;
+
+    my $ms = redis->pttl($namespace . '::' . $key);
+    # We pessimistically round to the start of the second where it
+    # will disappear.  While slightly wrong, it is likely less confusing.
+    # Nonexistent (or already expired) keys should return 0;
+    return ($ms <= 0) ? 0 : int($ms / 1000);
 }
 
 =head3 flushall
