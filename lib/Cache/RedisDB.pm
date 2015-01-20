@@ -140,7 +140,7 @@ Return a list of all known keys in the provided I<$namespace>.
 =cut
 
 sub keys {
-    my ($self, $namespace, @keys) = @_;
+    my ($self, $namespace) = @_;
     my $prefix = $namespace . '::';
     return [map { s/^$prefix//; $_ } @{redis->keys($prefix . '*')}];
 }
