@@ -9,19 +9,19 @@ use RedisServer;
 use Cache::RedisDB;
 
 my $server = RedisServer->start;
-plan( skip_all => "Can't start redis-server" ) unless $server;
+plan(skip_all => "Can't start redis-server") unless $server;
 
-$ENV{REDIS_CACHE_SERVER} = 'localhost:'.$server->{port};
+$ENV{REDIS_CACHE_SERVER} = 'localhost:' . $server->{port};
 
 my $cache = Cache::RedisDB->redis;
 
-plan( skip_all => 'Redis Server Not Found' ) unless $cache;
-plan( skip_all => "Test requires redis-server at least 1.2" ) unless $cache->version ge 1.003015;
+plan(skip_all => 'Redis Server Not Found') unless $cache;
+plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
 
 $cache->flushdb;
 
 isa_ok($cache, 'RedisDB', "RedisDB is used for cache");
-can_ok($cache,'flushall');
+can_ok($cache, 'flushall');
 
 my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
@@ -61,13 +61,18 @@ my $new_cache = Cache::RedisDB->redis_connection;
 isa $new_cache, 'RedisDB';
 isnt $new_cache, $cache, "Got new cache object";
 
+ok(Cache::RedisDB->set("Test", "TTL", "I will expire", 60), "Set TTL test key for 60 second expiration.");
 is(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
+is(Cache::RedisDB->ttl("Test", "TTL"), 59, "A moment later the expiration of TTL is down to 59 seconds.");
+is(Cache::RedisDB->ttl("Test", "key1"), 0, "Unexpiring key Test::key1 appears to expire now.");
+eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "key1"], "Got correct list for keys in Test namespace");
 is(Cache::RedisDB->del("Test", "key33", "key8", "key1"), 1, "Deleted Test::key1");
 is(Cache::RedisDB->get("Test", "key1"),     undef,                          "Got undef for Test::key1");
 is(Cache::RedisDB->get("",     "Testkey1"), "testvalue1",                   "Got testvalue1 for Testkey1");
 is(Cache::RedisDB->get("-",    "-"),        "-- it works! 它的工程！", "Got dash prefixed string");
 ok(Cache::RedisDB->set("Test", "Undef", undef), "Set undef");
 ok(Cache::RedisDB->set("Test", "Empty", ""),    "Set empty string");
+eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "Undef", "Empty"], "Got correct list for keys in Test namespace");
 is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
@@ -91,6 +96,9 @@ ok(Cache::RedisDB->set("Even this", "键",     "Oops...",     0.5), "Spaces and 
 is(Cache::RedisDB->get("Even this", "键"), "Oops...", "Got value for unicode key");
 sleep 1;
 is(Cache::RedisDB->get("Even this", "键"), undef, "unicode key value expired in 1s");
+cmp_ok(Cache::RedisDB->ttl('Test', 'TTL'), '<=', 59, 'Our TTL key still exists and expiring in the future');
+cmp_ok(Cache::RedisDB->ttl('Test', 'TTL2'), '==', 0, 'Our non-existent TTL key expires "now"');
+
 
 $cache->set("Test::Number", -33);
 is(Cache::RedisDB->get("Test", "Number"), -33, "Got negative number from cache");
@@ -110,6 +118,7 @@ subtest 'JSON' => sub {
 };
 
 is(Cache::RedisDB->flushall, 'OK', "Flushed DB");
+eq_or_diff(Cache::RedisDB->keys("Test"), [], "Got empty list for keys in Test namespace");
 is(Cache::RedisDB->get("Test", "Num2"), undef, "Really flushed");
 
 done_testing;

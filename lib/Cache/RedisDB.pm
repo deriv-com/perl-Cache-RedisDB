@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.04
+Version 0.07
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.07';
 
 =head1 SYNOPSIS
 
@@ -31,7 +31,7 @@ our $VERSION = '0.05';
 
 =head1 SUBROUTINES/METHODS
 
-=head2 redis_server_info 
+=head2 redis_server_info
 
 Returns redis host and port separated by colon
 
@@ -55,8 +55,7 @@ sub redis_connection {
         reconnect_attempts => 3,
         on_connect_error   => sub {
             confess "Cannot connect to server $server:$port";
-        }
-    );
+        });
 }
 
 =head2 redis
@@ -79,7 +78,7 @@ Retrieve I<$key> value from the cache.
 
 sub get {
     my ($self, $namespace, $key) = @_;
-    my $res = redis->get("${namespace}::${key}");
+    my $res = redis->get(_cache_key($namespace, $key));
     if (looks_like_sereal($res)) {
         state $decoder = Sereal::Decoder->new();
         $res = $decoder->decode($res);
@@ -97,15 +96,19 @@ If I<$exptime> specified, it is expiration time in seconds.
 sub set {
     my ($self, $namespace, $key, $value, $exptime, $callback) = @_;
     if (not defined $value or ref $value or Encode::is_utf8($value)) {
-        state $encoder = Sereal::Encoder->new({freeze_callbacks => 1, protocol_version => 2});
+        state $encoder = Sereal::Encoder->new({
+            freeze_callbacks => 1,
+            protocol_version => 2
+        });
         $value = $encoder->encode($value);
     }
+    my $cache_key = _cache_key($namespace, $key);
     if (defined $exptime) {
         $exptime = int(1000 * $exptime);
         # PX milliseconds -- Set the specified expire time, in milliseconds
-        return redis->set("${namespace}::${key}", $value, "PX", $exptime, $callback // ());
+        return redis->set($cache_key, $value, "PX", $exptime, $callback // ());
     } else {
-        return redis->set("${namespace}::${key}", $value, $callback // ());
+        return redis->set($cache_key, $value, $callback // ());
     }
 }
 
@@ -130,7 +133,43 @@ Returns number of deleted keys.
 
 sub del {
     my ($self, $namespace, @keys) = @_;
-    return redis->del(map { "${namespace}::$_" } @keys);
+    return redis->del(map { _cache_key($namespace, $_) } @keys);
+}
+
+=head2 keys($namespace)
+
+Return a list of all known keys in the provided I<$namespace>.
+
+=cut
+
+sub keys {
+    my ($self, $namespace) = @_;
+    my $prefix = _cache_key($namespace, undef);
+    return [map { s/^$prefix//; $_ } @{redis->keys($prefix . '*')}];
+}
+
+=head2 ttl($namespace, $key)
+
+Return the Time To Live (in seconds) of a key in the provided I<$namespace>.
+
+=cut
+
+sub ttl {
+    my ($self, $namespace, $key) = @_;
+
+    my $ms = redis->pttl(_cache_key($namespace, $key));
+    # We pessimistically round to the start of the second where it
+    # will disappear.  While slightly wrong, it is likely less confusing.
+    # Nonexistent (or already expired) keys should return 0;
+    return ($ms <= 0) ? 0 : int($ms / 1000);
+}
+
+sub _cache_key {
+    my ($namespace, $key) = @_;
+    $namespace //= '';
+    $key       //= '';
+
+    return $namespace . '::' . $key;
 }
 
 =head3 flushall
@@ -186,9 +225,6 @@ L<http://search.cpan.org/dist/Cache-RedisDB/>
 =back
 
 
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2014 binary.com.
@@ -232,4 +268,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Cache::RedisDB
+1;    # End of Cache::RedisDB
