@@ -19,6 +19,10 @@ Version 0.07
 
 This is just a warpper around RedisDB to have a single Redis object and connection per process. By default uses server 127.0.0.1:6379, but it may be overwritten by REDIS_CACHE_SERVER environment variable. It transparently handles forks.
 
+=head1 COMPATIBILITY AND REQUIREMENTS
+
+Requires Redis 2.6.12 and higher.
+
 =cut
 
 our $VERSION = '0.07';
@@ -223,7 +227,6 @@ L<http://cpanratings.perl.org/d/Cache-RedisDB>
 L<http://search.cpan.org/dist/Cache-RedisDB/>
 
 =back
-
 
 =head1 LICENSE AND COPYRIGHT
 
