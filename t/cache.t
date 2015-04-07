@@ -85,15 +85,18 @@ eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "Undef", "Empty"
 is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
-eq_or_diff(
-    Cache::RedisDB->get("Hash", "Ref"),
-    {
+SKIP: {
+    skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+    eq_or_diff(
+      Cache::RedisDB->get("Hash", "Ref"),
+      {
         a => 1,
         b => 2,
         c => "你好",
-    },
-    "Got hash from the cache"
-);
+      },
+      "Got hash from the cache"
+    );
+}
 
 my $now2 = Cache::RedisDB->get("Date", "Time");
 eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
