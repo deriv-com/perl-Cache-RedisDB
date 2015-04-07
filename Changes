@@ -20,3 +20,6 @@ Revision history for Cache-RedisDB
 
 0.07    24/01/2015
         Add "ttl" command for namespaces.
+
+0.08    08/04/2015
+        Fixed tests running on old redis server.
