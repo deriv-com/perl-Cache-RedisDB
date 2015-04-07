@@ -7,6 +7,7 @@ use DateTime;
 use JSON qw(from_json);
 use RedisServer;
 use Cache::RedisDB;
+use Data::Dumper;
 
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
@@ -26,6 +27,11 @@ can_ok($cache, 'flushall');
 my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
 
+my @version = split(/\./, $cache->info->{redis_version});
+my $sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
+                               ($version[2] >- 12));
+
+
 my $now = DateTime->now;
 my @now_exp = ($now->year, $now->month, $now->second, $now->time_zone);
 
@@ -38,19 +44,23 @@ if (fork) {
     $child->ok(Cache::RedisDB->set("Test", "key1", "value1"), "Set Test::key1");
     $child->ok(Cache::RedisDB->set_nw("", "Testkey1", "testvalue1"), "Set Testkey1 (no wait version)");
     $child->ok(Cache::RedisDB->set("-", "-", "-- it works! 它的工程！"), "Set dash prefixed string");
-    $child->ok(
-        Cache::RedisDB->set(
-            "Hash", "Ref",
-            {
-                a => 1,
-                b => 2,
-                c => "你好",
-            }
-        ),
-        "Set Hash::Ref"
-    );
+    SKIP: {
+         skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+            $child->ok(
+              Cache::RedisDB->set(
+                  "Hash", "Ref",
+                  {
+                    a => 1,
+                    b => 2,
+                    c => "你好",
+                  }
+             ),
+             "Set Hash::Ref"
+        );
+    }
     $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
     $child->is_eq(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
+    $child->ok($child->is_passing, 'Child is passing, new test to track down concurrency issues');
     die unless $child->is_passing;
     exit 0;
 }
