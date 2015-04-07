@@ -26,6 +26,11 @@ can_ok($cache, 'flushall');
 my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
 
+my @version = split(/\./, $cache->info->{redis_version});
+my $sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
+                               ($version[2] >= 12));
+
+
 my $now = DateTime->now;
 my @now_exp = ($now->year, $now->month, $now->second, $now->time_zone);
 
@@ -38,19 +43,23 @@ if (fork) {
     $child->ok(Cache::RedisDB->set("Test", "key1", "value1"), "Set Test::key1");
     $child->ok(Cache::RedisDB->set_nw("", "Testkey1", "testvalue1"), "Set Testkey1 (no wait version)");
     $child->ok(Cache::RedisDB->set("-", "-", "-- it works! 它的工程！"), "Set dash prefixed string");
-    $child->ok(
-        Cache::RedisDB->set(
-            "Hash", "Ref",
-            {
-                a => 1,
-                b => 2,
-                c => "你好",
-            }
-        ),
-        "Set Hash::Ref"
-    );
+    SKIP: {
+         skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+            $child->ok(
+              Cache::RedisDB->set(
+                  "Hash", "Ref",
+                  {
+                    a => 1,
+                    b => 2,
+                    c => "你好",
+                  }
+             ),
+             "Set Hash::Ref"
+        );
+    }
     $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
     $child->is_eq(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
+    $child->ok($child->is_passing, 'Child is passing, new test to track down concurrency issues');
     die unless $child->is_passing;
     exit 0;
 }
@@ -76,15 +85,18 @@ eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "Undef", "Empty"
 is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
-eq_or_diff(
-    Cache::RedisDB->get("Hash", "Ref"),
-    {
+SKIP: {
+    skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+    eq_or_diff(
+      Cache::RedisDB->get("Hash", "Ref"),
+      {
         a => 1,
         b => 2,
         c => "你好",
-    },
-    "Got hash from the cache"
-);
+      },
+      "Got hash from the cache"
+    );
+}
 
 my $now2 = Cache::RedisDB->get("Date", "Time");
 eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";

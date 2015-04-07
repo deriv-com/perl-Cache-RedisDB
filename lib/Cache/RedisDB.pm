@@ -13,15 +13,20 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =head1 DESCRIPTION
 
 This is just a warpper around RedisDB to have a single Redis object and connection per process. By default uses server 127.0.0.1:6379, but it may be overwritten by REDIS_CACHE_SERVER environment variable. It transparently handles forks.
 
+=head1 COMPATIBILITY AND REQUIREMENTS
+
+Redis 2.6.12 and higher strongly recommended.  Required if you want to use
+extended options in ->set().
+
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 SYNOPSIS
 
@@ -223,7 +228,6 @@ L<http://cpanratings.perl.org/d/Cache-RedisDB>
 L<http://search.cpan.org/dist/Cache-RedisDB/>
 
 =back
-
 
 =head1 LICENSE AND COPYRIGHT
 
