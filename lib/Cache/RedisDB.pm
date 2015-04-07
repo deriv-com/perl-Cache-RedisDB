@@ -21,7 +21,8 @@ This is just a warpper around RedisDB to have a single Redis object and connecti
 
 =head1 COMPATIBILITY AND REQUIREMENTS
 
-Requires Redis 2.6.12 and higher.
+Redis 2.6.12 and higher strongly recommended.  Required if you want to use
+extended options in ->set().
 
 =cut
 
