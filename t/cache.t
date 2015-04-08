@@ -49,7 +49,7 @@ if (fork) {
     $child->ok(Cache::RedisDB->set_nw("", "Testkey1", "testvalue1"), "Set Testkey1 (no wait version)");
     $child->ok(Cache::RedisDB->set("-", "-", "-- it works! 它的工程！"), "Set dash prefixed string");
     SKIP: {
-         skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+         skip 'Redis 2.6.12 or higher', 2 unless $sufficient_version;
             $child->ok(
               Cache::RedisDB->set(
                   "Hash", "Ref",
@@ -91,7 +91,7 @@ is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
 SKIP: {
-    skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+    skip 'Redis 2.6.12 or higher', 2 unless $sufficient_version;
     eq_or_diff(
       Cache::RedisDB->get("Hash", "Ref"),
       {
