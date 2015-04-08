@@ -7,6 +7,7 @@ use DateTime;
 use JSON qw(from_json);
 use RedisServer;
 use Cache::RedisDB;
+use strict;
 
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
