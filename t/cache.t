@@ -27,6 +27,9 @@ my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
 
 my @version = split(/\./, $cache->info->{redis_version});
+
+diag "Redis server version: $cache->info->{redis_version}";
+
 my $sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
                                ($version[2] >= 12));
 
