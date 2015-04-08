@@ -30,7 +30,8 @@ my @version = split(/\./, $cache->info->{redis_version});
 
 diag "Redis server version: ". $cache->info->{redis_version};
 
-my $sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
+my $sufficient_version = 0;
+$sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
                                ($version[2] >= 12));
 
 
