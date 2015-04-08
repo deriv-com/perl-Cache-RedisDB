@@ -124,14 +124,17 @@ is($cache->get("Test::Num2"), -55, "It is stored as number");
 
 subtest 'JSON' => sub {
     plan tests => 6;
-    my $json_string = '{"should_be_true" : true, "should_be_false" : false}';
-    my $json_obj    = from_json($json_string);
-    ok($json_obj->{should_be_true},   'True is true');
-    ok(!$json_obj->{should_be_false}, 'False is false');
-    ok(Cache::RedisDB->set('Test', 'JSON', $json_obj), 'Stored JSON successfully');
-    ok($json_obj = Cache::RedisDB->get('Test', 'JSON'), 'Retrieved JSON successfully');
-    ok($json_obj->{should_be_true},   'True is true');
-    ok(!$json_obj->{should_be_false}, 'False is false');
+    SKIP: {
+        skip 'Redis 2.6.12 or higher', 6 unless $sufficient_version;
+        my $json_string = '{"should_be_true" : true, "should_be_false" : false}';
+        my $json_obj    = from_json($json_string);
+        ok($json_obj->{should_be_true},   'True is true');
+        ok(!$json_obj->{should_be_false}, 'False is false');
+        ok(Cache::RedisDB->set('Test', 'JSON', $json_obj), 'Stored JSON successfully');
+        ok($json_obj = Cache::RedisDB->get('Test', 'JSON'), 'Retrieved JSON successfully');
+        ok($json_obj->{should_be_true},   'True is true');
+        ok(!$json_obj->{should_be_false}, 'False is false');
+    } 
 };
 
 is(Cache::RedisDB->flushall, 'OK', "Flushed DB");
