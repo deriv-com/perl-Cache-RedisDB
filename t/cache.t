@@ -61,8 +61,8 @@ if (fork) {
              ),
              "Set Hash::Ref"
         );
+        $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
     }
-    $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
     $child->is_eq(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
     $child->ok($child->is_passing, 'Child is passing, new test to track down concurrency issues');
     die unless $child->is_passing;
@@ -101,10 +101,10 @@ SKIP: {
       },
       "Got hash from the cache"
     );
-}
+    my $now2 = Cache::RedisDB->get("Date", "Time");
+    eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
 
-my $now2 = Cache::RedisDB->get("Date", "Time");
-eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
+}
 
 is(Cache::RedisDB->get("NonExistent", "Key"), undef, "Got undef value for non-existing key");
 
