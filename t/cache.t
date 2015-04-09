@@ -7,6 +7,7 @@ use DateTime;
 use JSON qw(from_json);
 use RedisServer;
 use Cache::RedisDB;
+use strict;
 
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
@@ -18,6 +19,16 @@ my $cache = Cache::RedisDB->redis;
 plan(skip_all => 'Redis Server Not Found') unless $cache;
 plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
 
+diag "Redis server version: ". $cache->info->{redis_version};
+
+my @version = split(/\./, $cache->info->{redis_version});
+my $sufficient_version = 0;
+$sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
+                               ($version[2] >= 12));
+
+
+plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
+    unless $sufficient_version;
 $cache->flushdb;
 
 isa_ok($cache, 'RedisDB', "RedisDB is used for cache");
@@ -25,10 +36,6 @@ can_ok($cache, 'flushall');
 
 my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
-
-my @version = split(/\./, $cache->info->{redis_version});
-my $sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
-                               ($version[2] >= 12));
 
 
 my $now = DateTime->now;
@@ -44,7 +51,7 @@ if (fork) {
     $child->ok(Cache::RedisDB->set_nw("", "Testkey1", "testvalue1"), "Set Testkey1 (no wait version)");
     $child->ok(Cache::RedisDB->set("-", "-", "-- it works! 它的工程！"), "Set dash prefixed string");
     SKIP: {
-         skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+         skip 'Redis 2.6.12 or higher', 2 unless $sufficient_version;
             $child->ok(
               Cache::RedisDB->set(
                   "Hash", "Ref",
@@ -56,8 +63,8 @@ if (fork) {
              ),
              "Set Hash::Ref"
         );
+        $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
     }
-    $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
     $child->is_eq(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
     $child->ok($child->is_passing, 'Child is passing, new test to track down concurrency issues');
     die unless $child->is_passing;
@@ -86,7 +93,7 @@ is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
 SKIP: {
-    skip 'Redis 2.6.12 or higher', 1 unless $sufficient_version;
+    skip 'Redis 2.6.12 or higher', 2 unless $sufficient_version;
     eq_or_diff(
       Cache::RedisDB->get("Hash", "Ref"),
       {
@@ -96,10 +103,10 @@ SKIP: {
       },
       "Got hash from the cache"
     );
-}
+    my $now2 = Cache::RedisDB->get("Date", "Time");
+    eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
 
-my $now2 = Cache::RedisDB->get("Date", "Time");
-eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
+}
 
 is(Cache::RedisDB->get("NonExistent", "Key"), undef, "Got undef value for non-existing key");
 
@@ -119,14 +126,17 @@ is($cache->get("Test::Num2"), -55, "It is stored as number");
 
 subtest 'JSON' => sub {
     plan tests => 6;
-    my $json_string = '{"should_be_true" : true, "should_be_false" : false}';
-    my $json_obj    = from_json($json_string);
-    ok($json_obj->{should_be_true},   'True is true');
-    ok(!$json_obj->{should_be_false}, 'False is false');
-    ok(Cache::RedisDB->set('Test', 'JSON', $json_obj), 'Stored JSON successfully');
-    ok($json_obj = Cache::RedisDB->get('Test', 'JSON'), 'Retrieved JSON successfully');
-    ok($json_obj->{should_be_true},   'True is true');
-    ok(!$json_obj->{should_be_false}, 'False is false');
+    SKIP: {
+        skip 'Redis 2.6.12 or higher', 6 unless $sufficient_version;
+        my $json_string = '{"should_be_true" : true, "should_be_false" : false}';
+        my $json_obj    = from_json($json_string);
+        ok($json_obj->{should_be_true},   'True is true');
+        ok(!$json_obj->{should_be_false}, 'False is false');
+        ok(Cache::RedisDB->set('Test', 'JSON', $json_obj), 'Stored JSON successfully');
+        ok($json_obj = Cache::RedisDB->get('Test', 'JSON'), 'Retrieved JSON successfully');
+        ok($json_obj->{should_be_true},   'True is true');
+        ok(!$json_obj->{should_be_false}, 'False is false');
+    } 
 };
 
 is(Cache::RedisDB->flushall, 'OK', "Flushed DB");
