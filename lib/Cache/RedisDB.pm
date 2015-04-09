@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =head1 DESCRIPTION
 
@@ -26,7 +26,7 @@ extended options in ->set().
 
 =cut
 
-our $VERSION = '0.080_2';
+our $VERSION = '0.09';
 
 =head1 SYNOPSIS
 

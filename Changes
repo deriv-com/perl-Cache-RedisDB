@@ -23,3 +23,6 @@ Revision history for Cache-RedisDB
 
 0.08    08/04/2015
         Fixed tests running on old redis server.
+
+0.09	09/09/2015
+	Better documentation and test fixes for Redis before extended options

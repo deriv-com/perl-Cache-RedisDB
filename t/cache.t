@@ -19,6 +19,16 @@ my $cache = Cache::RedisDB->redis;
 plan(skip_all => 'Redis Server Not Found') unless $cache;
 plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
 
+diag "Redis server version: ". $cache->info->{redis_version};
+
+my @version = split(/\./, $cache->info->{redis_version});
+my $sufficient_version = 0;
+$sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
+                               ($version[2] >= 12));
+
+
+plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
+    unless $sufficient_version;
 $cache->flushdb;
 
 isa_ok($cache, 'RedisDB', "RedisDB is used for cache");
@@ -26,14 +36,6 @@ can_ok($cache, 'flushall');
 
 my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
-
-my @version = split(/\./, $cache->info->{redis_version});
-
-diag "Redis server version: ". $cache->info->{redis_version};
-
-my $sufficient_version = 0;
-$sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
-                               ($version[2] >= 12));
 
 
 my $now = DateTime->now;
