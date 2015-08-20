@@ -34,6 +34,8 @@ logfile $logfile
 databases 2
 dbfilename dump_test.rdb
 dir $args{dir}
+unixsocketperm 777
+unixsocket $args{dir}/redis.sock
 $requirepass
 EOC
             open my $cfg_fd, ">", File::Spec->catfile( $args{dir}, "redis.cfg" ) or die $!;
@@ -43,6 +45,7 @@ EOC
         },
     );
     $self->{port} = $self->{_t_tcp}->port;
+    $self->{path} = "$args{dir}/redis.sock";
     return $self;
 }
 

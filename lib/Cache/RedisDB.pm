@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 use Carp;
 use RedisDB 2.14;
 use Sereal qw(looks_like_sereal);
+use IO::Socket::IP;
 
 =head1 NAME
 
@@ -13,11 +14,14 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =head1 DESCRIPTION
 
-This is just a warpper around RedisDB to have a single Redis object and connection per process. By default uses server 127.0.0.1:6379, but it may be overwritten by REDIS_CACHE_SERVER environment variable. It transparently handles forks.
+This is just a warpper around RedisDB to have a single Redis object and
+connection per process. By default uses server 127.0.0.1:6379, but it may
+be overwritten by REDIS_CACHE_SERVER environment variable. It transparently
+handles forks.
 
 =head1 COMPATIBILITY AND REQUIREMENTS
 
@@ -26,7 +30,7 @@ extended options in ->set().
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
@@ -48,18 +52,54 @@ sub redis_server_info {
 
 =head2 redis_connection
 
-Creates new connection to redis-server and returns corresponding RedisDB object.
+Creates new connection to redis-server and returns corresponding RedisDB
+object. It inspects the current value of the C<REDIS_CACHE_SERVER> environment
+variable to get the endpoint of the redis server. If not set,
+C<127.0.0.1:6379> is used by default.
+
+The C<REDIS_CACHE_SERVER> variable is expected as follows:
+
+=over 4
+
+=item ipv4_address:port
+
+=item ipv6_address:port
+
+=item hostname:port
+
+Port is optional and can be given as name instead of a number.
+
+Examples:
+
+ 127.0.0.10:2345                # ipv4
+ [::1]:2345                     # ipv6
+ redis.tld.com:2345             # hostname
+ 127.0.0.1:mysql                # if your redis listens on port 3306
+ 192.168.9.234                  # port is optional
+
+=item the fully qualified path name of a unix domain socket
+
+Example:
+
+ /tmp/redis.sock
+
+=back
 
 =cut
 
 sub redis_connection {
-    my ($server, $port) = split /:/, redis_server_info();
+    my ($server, $port) = IO::Socket::IP->split_addr(redis_server_info);
+    my @opts;
+    if ($server =~ m!^/!) {
+        @opts = (path => $server);
+    } else {
+        @opts = (host => $server, port => $port // 6379);
+    }
     return RedisDB->new(
-        host               => $server,
-        port               => $port,
+        @opts,
         reconnect_attempts => 3,
         on_connect_error   => sub {
-            confess "Cannot connect to server $server:$port";
+            confess "Cannot connect to server (@opts)";
         });
 }
 
@@ -67,10 +107,29 @@ sub redis_connection {
 
 Returns RedisDB object connected to the correct redis server.
 
+When called for the first time, the method uses C<redis_connection> to
+establish a connection to the redis server. This connection is then
+cached.
+
+The C<redis> method can also be used to reset or change the cached L<RedisDB>
+handle.
+
+To change the handle pass your own L<RedisDB> object:
+
+ Cache::RedisDB->redis(RedisDB->new(...))
+
+To reset the cached handle:
+
+ Cache::RedisDB->redis(undef)
+
+Note, after resetting the handle, the next call to the method will establish
+a new connection.
+
 =cut
 
 sub redis {
     state $redis;
+    return $redis = $_[1] if @_>1;
     $redis //= redis_connection();
     return $redis;
 }
