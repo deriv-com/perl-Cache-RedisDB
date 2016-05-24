@@ -14,10 +14,10 @@ before_install:
     - source ~/travis-perl-helpers/init
     - build-perl
     - perl -V
-    - "cpanm -v JSON"
-    - "cpanm -v DateTime"
-    - "cpanm -v Test::FailWarnings"
-    - "cpanm -v Test::Most"
-    - "cpanm -v Devel::Cover::Report::Coveralls"
+    - "cpanm -n JSON"
+    - "cpanm -n DateTime"
+    - "cpanm -n Test::FailWarnings"
+    - "cpanm -n Test::Most"
+    - "cpanm -n Devel::Cover::Report::Coveralls"
 script:
   perl Makefile.PL && make test && cover -test -report coveralls
