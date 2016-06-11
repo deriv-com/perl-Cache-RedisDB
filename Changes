@@ -26,3 +26,9 @@ Revision history for Cache-RedisDB
 
 0.09	09/09/2015
 	Better documentation and test fixes for Redis before extended options
+
+0.10    20/08/2015
+        - better documentation
+        - IPv6 and UNIX DOMAIN connections
+        - way to change RedisDB connection once it's been initialized
+        - add .gitignore

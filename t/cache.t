@@ -73,9 +73,23 @@ if (fork) {
 
 my $cache3 = Cache::RedisDB->redis;
 is $cache3, $cache, "Got the same cache object again in the parent";
-my $new_cache = Cache::RedisDB->redis_connection;
+my $new_cache = do {
+   $ENV{REDIS_CACHE_SERVER} = $server->{path};
+   Cache::RedisDB->redis_connection;
+};
 isa $new_cache, 'RedisDB';
 isnt $new_cache, $cache, "Got new cache object";
+
+Cache::RedisDB->redis($new_cache);
+is +Cache::RedisDB->redis, $new_cache, 'Set new cache object';
+
+is +Cache::RedisDB->redis(undef), undef, 'Close redis connection';
+{
+    $ENV{REDIS_CACHE_SERVER} = $server->{path};
+    my $cache4 = Cache::RedisDB->redis;
+    isa $cache4, 'RedisDB';
+    isnt $cache4, $new_cache, 'got new redis object after dropping prev.';
+}
 
 ok(Cache::RedisDB->set("Test", "TTL", "I will expire", 60), "Set TTL test key for 60 second expiration.");
 is(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
