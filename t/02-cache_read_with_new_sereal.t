@@ -17,26 +17,7 @@ is($Sereal::VERSION, 3.014);
 is($Sereal::Decoder::VERSION, 3.014);
 is($Sereal::Encoder::VERSION, 3.014);
 
-#my $server = RedisServer->start;
-#plan(skip_all => "Can't start redis-server") unless $server;
-#
-#$ENV{REDIS_CACHE_SERVER} = 'localhost:' . $server->{port};
-
 my $cache = Cache::RedisDB->redis;
-
-#plan(skip_all => 'Redis Server Not Found') unless $cache;
-#plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
-
-#diag "Redis server version: ". $cache->info->{redis_version};
-
-#my @version = split(/\./, $cache->info->{redis_version});
-#my $sufficient_version = 0;
-#$sufficient_version = 1;
-
-
-#plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
-#    unless $sufficient_version;
-
 
 is(Cache::RedisDB->get("Test", "ascii"), "This is ascii", "Get ascii.");
 is(Cache::RedisDB->get("Test", "Chinese"), "它的工程", "Get Chinese.");

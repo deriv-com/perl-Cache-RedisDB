@@ -17,25 +17,10 @@ is($Sereal::VERSION, 2.011);
 is($Sereal::Decoder::VERSION, 2.01);
 is($Sereal::Encoder::VERSION, 2.01);
 
-#my $server = RedisServer->start;
-#plan(skip_all => "Can't start redis-server") unless $server;
-#
-#$ENV{REDIS_CACHE_SERVER} = 'localhost:' . $server->{port};
 
 my $cache = Cache::RedisDB->redis;
 
-#plan(skip_all => 'Redis Server Not Found') unless $cache;
-#plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
 
-#diag "Redis server version: ". $cache->info->{redis_version};
-
-#my @version = split(/\./, $cache->info->{redis_version});
-#my $sufficient_version = 0;
-#$sufficient_version = 1;
-
-
-#plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
-#    unless $sufficient_version;
 $cache->flushdb;
 
 ok(Cache::RedisDB->set("Test", "ascii", "This is ascii"), "Set ascii.");
