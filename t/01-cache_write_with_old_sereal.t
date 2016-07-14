@@ -1,10 +1,10 @@
 use lib 't';
 
 use utf8;
-use lib '/tmp/new_sereal/local/lib/perl5';
-use Sereal 3.014;
-use Sereal::Decoder 3.014;
-use Sereal::Encoder 3.014;
+use lib '/tmp/old_sereal/local/lib/perl5';
+use Sereal 2.011;
+use Sereal::Decoder 2.01;
+use Sereal::Encoder 2.01;
 use Test::Most 0.22;
 use Test::FailWarnings;
 use DateTime;
@@ -12,6 +12,10 @@ use JSON qw(from_json);
 use RedisServer;
 use Cache::RedisDB;
 use strict;
+
+is($Sereal::VERSION, 2.01);
+is($Sereal::Decoder::VERSION, 2.01);
+is($Sereal::Encoder::VERSION, 2.01);
 
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
@@ -32,15 +36,17 @@ $sufficient_version = 1;
 
 plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
     unless $sufficient_version;
+$cache->flushdb;
 
-is(Cache::RedisDB->get("Test", "ascii"), "This is ascii", "Get ascii.");
-is(Cache::RedisDB->get("Test", "Chinese"), "它的工程", "Get Chinese.");
-is(Cache::RedisDB->get("Test", "German"),"derbys s'équilibrent à l'exception","Get German");
-eq_or_diff(Cache::RedisDB->get("Test", "HashRef"),
+ok(Cache::RedisDB->set("Test", "ascii", "This is ascii"), "Set ascii.");
+ok(Cache::RedisDB->set("Test", "Chinese", "它的工程"), "Set Chinese.");
+ok(Cache::RedisDB->set("Test", "German","derbys s'équilibrent à l'exception"), "Set German");
+ok(Cache::RedisDB->set("Test", "HashRef",
                           {
                            'ascii' => "This is ascii",
                            'Chinese' => "它的工程",
                            'German' => "derbys s'équilibrent à l'exception",
-                          }, "get hash");
-$cache->flushdb;
+                          }
+                         ), "set hash");
+
 done_testing;
