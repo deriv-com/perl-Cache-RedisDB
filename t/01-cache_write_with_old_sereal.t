@@ -13,7 +13,7 @@ use RedisServer;
 use Cache::RedisDB;
 use strict;
 
-is($Sereal::VERSION, 2.01);
+is($Sereal::VERSION, 2.011);
 is($Sereal::Decoder::VERSION, 2.01);
 is($Sereal::Encoder::VERSION, 2.01);
 
