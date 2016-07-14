@@ -13,6 +13,10 @@ use RedisServer;
 use Cache::RedisDB;
 use strict;
 
+is($Sereal::VERSION, 3.014);
+is($Sereal::Decoder::VERSION, 3.014);
+is($Sereal::Encoder::VERSION, 3.014);
+
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
 
