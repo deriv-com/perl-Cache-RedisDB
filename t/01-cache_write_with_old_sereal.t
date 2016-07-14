@@ -35,7 +35,7 @@ plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
 
 is(Cache::RedisDB->get("Test", "ascii"), "This is ascii", "Get ascii.");
 is(Cache::RedisDB->get("Test", "Chinese"), "它的工程", "Get Chinese.");
-is(Cache::RedisDB->get("Test," "German"),"derbys s'équilibrent à l'exception","Get German");
+is(Cache::RedisDB->get("Test", "German"),"derbys s'équilibrent à l'exception","Get German");
 eq_or_diff(Cache::RedisDB->get("Test", "HashRef"),
                           {
                            'ascii' => "This is ascii",
