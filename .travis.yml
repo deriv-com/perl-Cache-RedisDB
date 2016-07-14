@@ -23,4 +23,4 @@ before_install:
     - (cd /tmp/old_sereal && cpanm -l local -n https://cpan.metacpan.org/authors/id/S/SM/SMUELLER/Sereal-2.011.tar.gz https://cpan.metacpan.org/authors/id/S/SM/SMUELLER/Sereal-Decoder-2.01.tar.gz https://cpan.metacpan.org/authors/id/S/SM/SMUELLER/Sereal-Encoder-2.01.tar.gz)
     - (cd /tmp/new_sereal && cpanm -l local -n https://cpan.metacpan.org/authors/id/Y/YV/YVES/Sereal-3.014.tar.gz https://cpan.metacpan.org/authors/id/Y/YV/YVES/Sereal-Decoder-3.014.tar.gz https://cpan.metacpan.org/authors/id/Y/YV/YVES/Sereal-Encoder-3.014.tar.gz )
 script:
-  perl Makefile.PL && make test && cover -test -report coveralls
+  perl Makefile.PL && make test
