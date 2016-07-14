@@ -19,5 +19,8 @@ before_install:
     - "cpanm -n Test::FailWarnings"
     - "cpanm -n Test::Most"
     - "cpanm -n Devel::Cover::Report::Coveralls"
+    - mkdir /tmp/old_sereal /tmp/new_sereal
+    - (cd /tmp/old_sereal && cpanm -l local -n YVES/Sereal-2.011.tar.gz SMUELLER/Sereal-Decoder-2.01.tar.gz SM/SMUELLER/Sereal-Encoder-2.01.tar.gz)
+    - (cd /tmp/new_sereal && cpanm -l local -n YVES/Sereal-3.014.tar.gz YVES/Sereal-Decoder-3.014.tar.gz YVES/Sereal-Encoder-3.014.tar.gz)
 script:
   perl Makefile.PL && make test && cover -test -report coveralls
