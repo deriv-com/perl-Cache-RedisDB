@@ -103,7 +103,6 @@ sub set {
     if (not defined $value or ref $value or Encode::is_utf8($value)) {
         state $encoder = Sereal::Encoder->new({
             freeze_callbacks => 1,
-            protocol_version => 2
         });
         $value = $encoder->encode($value);
     }
