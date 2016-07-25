@@ -26,7 +26,7 @@ extended options in ->set().
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
