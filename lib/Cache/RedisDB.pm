@@ -13,7 +13,7 @@ Cache::RedisDB - RedisDB based cache system
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =head1 DESCRIPTION
 
@@ -26,7 +26,7 @@ extended options in ->set().
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
@@ -103,7 +103,6 @@ sub set {
     if (not defined $value or ref $value or Encode::is_utf8($value)) {
         state $encoder = Sereal::Encoder->new({
             freeze_callbacks => 1,
-            protocol_version => 2
         });
         $value = $encoder->encode($value);
     }
