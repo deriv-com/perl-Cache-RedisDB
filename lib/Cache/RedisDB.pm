@@ -17,7 +17,7 @@ Version 0.10
 
 =head1 DESCRIPTION
 
-This is just a warpper around RedisDB to have a single Redis object and connection per process. By default uses server 127.0.0.1:6379, but it may be overwritten by REDIS_CACHE_SERVER environment variable. It transparently handles forks.
+This is just a wrapper around RedisDB to have a single Redis object and connection per process. By default uses server redis://127.0.0.1, but it may be overwritten by REDIS_CACHE_SERVER environment variable. It transparently handles forks.
 
 =head1 COMPATIBILITY AND REQUIREMENTS
 
@@ -36,14 +36,20 @@ our $VERSION = '0.10';
 
 =head1 SUBROUTINES/METHODS
 
-=head2 redis_server_info
+=head2 redis_uri
 
-Returns redis host and port separated by colon
+Returns redis uri
 
 =cut
 
-sub redis_server_info {
-    return $ENV{REDIS_CACHE_SERVER} || '127.0.0.1:6379';
+sub redis_uri {
+
+    my $redis_uri = $ENV{REDIS_CACHE_SERVER} // 'redis://127.0.0.1';
+
+    # Probably a legacy TCP host:port
+    $redis_uri = 'redis://' . $redis_uri if ($redis_uri =~ m#^[^/]+:[0-9]{1,5}$#);
+
+    return $redis_uri;
 }
 
 =head2 redis_connection
@@ -53,13 +59,11 @@ Creates new connection to redis-server and returns corresponding RedisDB object.
 =cut
 
 sub redis_connection {
-    my ($server, $port) = split /:/, redis_server_info();
     return RedisDB->new(
-        host               => $server,
-        port               => $port,
+        url                => redis_uri(),
         reconnect_attempts => 3,
         on_connect_error   => sub {
-            confess "Cannot connect to server $server:$port";
+            confess "Cannot connect: " . redis_uri();
         });
 }
 
@@ -149,7 +153,8 @@ Return a list of all known keys in the provided I<$namespace>.
 sub keys {
     my ($self, $namespace) = @_;
     my $prefix = _cache_key($namespace, undef);
-    return [map { s/^$prefix//; $_ } @{redis->keys($prefix . '*')}];
+    my $pl = length($prefix);
+    return [map { substr($_, $pl) } @{redis->keys($prefix . '*')}];
 }
 
 =head2 ttl($namespace, $key)
