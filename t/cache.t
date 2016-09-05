@@ -8,6 +8,7 @@ use JSON qw(from_json);
 use RedisServer;
 use Cache::RedisDB;
 use strict;
+use version;
 
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
@@ -22,10 +23,7 @@ plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->versi
 diag "Redis server version: ". $cache->info->{redis_version};
 
 my @version = split(/\./, $cache->info->{redis_version});
-my $sufficient_version = 0;
-$sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
-                               ($version[2] >= 12));
-
+my $sufficient_version = (version->parse($cache->info->{redis_version}) > version->parse("2.6.12")) ? 1 : 0;
 
 plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
     unless $sufficient_version;
