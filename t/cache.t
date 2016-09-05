@@ -77,7 +77,6 @@ isnt $new_cache, $cache, "Got new cache object";
 
 ok(Cache::RedisDB->set("Test", "TTL", "I will expire", 60), "Set TTL test key for 60 second expiration.");
 is(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
-is(Cache::RedisDB->ttl("Test", "TTL"), 59, "A moment later the expiration of TTL is down to 59 seconds.");
 is(Cache::RedisDB->ttl("Test", "key1"), 0, "Unexpiring key Test::key1 appears to expire now.");
 eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "key1"], "Got correct list for keys in Test namespace");
 is(Cache::RedisDB->del("Test", "key33", "key8", "key1"), 1, "Deleted Test::key1");
