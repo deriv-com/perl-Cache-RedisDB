@@ -3,7 +3,7 @@
 This is just a warpper around RedisDB to have a single Redis object and connection per process. By default uses server 127.0.0.1:6379, but it may be overwritten by REDIS_CACHE_SERVER environment variable. It transparently handles forks.
 
 [![Build Status](https://travis-ci.org/binary-com/perl-Cache-RedisDB.svg?branch=master)](https://travis-ci.org/binary-com/perl-Cache-RedisDB)
-[![Coverage Status](https://coveralls.io/repos/binary-com/perl-Cache-RedisDB/badge.png?branch=master)](https://coveralls.io/r/binary-com/perl-Cache-RedisDB?branch=master)
+[![codecov](https://codecov.io/gh/binary-com/perl-Cache-RedisDB/branch/master/graph/badge.svg)](https://codecov.io/gh/binary-com/perl-Cache-RedisDB)
 [![Gitter chat](https://badges.gitter.im/binary-com/perl-Cache-RedisDB.png)](https://gitter.im/binary-com/perl-Cache-RedisDB)
 
 SYNOPSIS
