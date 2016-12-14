@@ -8,6 +8,7 @@ use JSON qw(from_json);
 use RedisServer;
 use Cache::RedisDB;
 use strict;
+use version;
 
 my $server = RedisServer->start;
 plan(skip_all => "Can't start redis-server") unless $server;
@@ -22,10 +23,7 @@ plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->versi
 diag "Redis server version: ". $cache->info->{redis_version};
 
 my @version = split(/\./, $cache->info->{redis_version});
-my $sufficient_version = 0;
-$sufficient_version = 1 if (($version[0] >= 2) && ($version[1] >= 6) && 
-                               ($version[2] >= 12));
-
+my $sufficient_version = (version->parse($cache->info->{redis_version}) > version->parse("2.6.12")) ? 1 : 0;
 
 plan (skip_all => 'Skipping full cache test due to Redis being below 2.6.12')
     unless $sufficient_version;
@@ -79,7 +77,6 @@ isnt $new_cache, $cache, "Got new cache object";
 
 ok(Cache::RedisDB->set("Test", "TTL", "I will expire", 60), "Set TTL test key for 60 second expiration.");
 is(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
-is(Cache::RedisDB->ttl("Test", "TTL"), 59, "A moment later the expiration of TTL is down to 59 seconds.");
 is(Cache::RedisDB->ttl("Test", "key1"), 0, "Unexpiring key Test::key1 appears to expire now.");
 eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "key1"], "Got correct list for keys in Test namespace");
 is(Cache::RedisDB->del("Test", "key33", "key8", "key1"), 1, "Deleted Test::key1");
