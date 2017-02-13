@@ -150,7 +150,7 @@ Return a list of all known keys in the provided I<$namespace>.
 
 =cut
 
-sub keys {
+sub keys { ## no critic (ProhibitBuiltinHomonyms)
     my ($self, $namespace) = @_;
     my $prefix = _cache_key($namespace, undef);
     my $pl = length($prefix);
