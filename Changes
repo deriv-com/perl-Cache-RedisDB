@@ -1,6 +1,8 @@
 Revision history for Cache-RedisDB
 
 {{$NEXT}}
+
+0.12      2017-02-20 01:59:11+00:00 UTC
     Switch to dzil
 
 0.11

@@ -22,7 +22,7 @@ extended options in ->set().
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 SYNOPSIS
 
@@ -146,7 +146,7 @@ Return a list of all known keys in the provided I<$namespace>.
 
 =cut
 
-sub keys { ## no critic (ProhibitBuiltinHomonyms)
+sub keys {    ## no critic (ProhibitBuiltinHomonyms)
     my ($self, $namespace) = @_;
     my $prefix = _cache_key($namespace, undef);
     my $pl = length($prefix);
