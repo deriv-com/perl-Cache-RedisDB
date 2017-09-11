@@ -18,7 +18,7 @@ $ENV{REDIS_CACHE_SERVER} = 'localhost:' . $server->{port};
 my $cache = Cache::RedisDB->redis;
 
 plan(skip_all => 'Redis Server Not Found') unless $cache;
-plan(skip_all => "Test requires redis-server at least 1.2") unless $cache->version ge 1.003015;
+plan(skip_all => "Test requires redis-server at least 1.3.15") unless $cache->version ge 1.003015;
 
 diag "Redis server version: ". $cache->info->{redis_version};
 
