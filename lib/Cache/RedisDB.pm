@@ -154,15 +154,15 @@ sub del {
 
 =head2 keys($namespace)
 
-Return a list of all known keys in the provided I<$namespace>.
+Return an arrayref of all known keys in the provided C<$namespace>.
 
 =cut
 
-sub keys {    ## no critic (ProhibitBuiltinHomonyms)
+sub keys : method {    ## no critic (ProhibitBuiltinHomonyms)
     my ($self, $namespace) = @_;
     my $prefix = _cache_key($namespace, undef);
     my $pl = length($prefix);
-    return [map { substr($_, $pl) } @{redis->keys($prefix . '*')}];
+    return [map { substr($_, $pl) } @{redis()->keys($prefix . '*')}];
 }
 
 =head2 ttl($namespace, $key)
