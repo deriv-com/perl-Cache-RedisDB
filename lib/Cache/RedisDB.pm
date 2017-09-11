@@ -98,6 +98,27 @@ sub get {
     return $res;
 }
 
+=head2 mget
+
+Retrieve values for multiple keys in a single call.
+
+Similar to L</get>, this takes a C<$namespace> as the first parameter,
+but it also accepts a list of C<@keys> to look up.
+
+Returns an arrayref in the same order as the original keys. For any
+key that had no value, the resulting arrayref will contain C<undef>.
+
+=cut
+
+sub mget {
+    my ($self, $namespace, @keys) = @_;
+    my $res = Cache::RedisDB::redis()->mget(map { Cache::RedisDB::_cache_key($namespace, $_) } @keys);
+    state $decoder = Sereal::Decoder->new();
+    return [ map {
+        ($_ && looks_like_sereal($_)) ? $decoder->decode($_) : $_
+    } @$res ];
+}
+
 =head2 set
 
 Creates or updates a Redis key under C<$namespace>, C<$key> using the scalar C<$value>.

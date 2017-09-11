@@ -137,7 +137,12 @@ subtest 'JSON' => sub {
 };
 
 is(Cache::RedisDB->flushall, 'OK', "Flushed DB");
-eq_or_diff(Cache::RedisDB->keys("Test"), [], "Got empty list for keys in Test namespace");
+eq_or_diff(Cache::RedisDB->keys("Test"), [], "Got empty arrayref for keys in Test namespace");
 is(Cache::RedisDB->get("Test", "Num2"), undef, "Really flushed");
 
+ok(Cache::RedisDB->set('mget_ns', 'one', 1), 'set first key');
+ok(Cache::RedisDB->set('mget_ns', 'two', 2), 'set second key');
+ok(Cache::RedisDB->set('mget_ns', 'three', 3), 'set third key');
+ok(Cache::RedisDB->set('mget_ns', 'four', 4), 'set fourth key');
+is_deeply(Cache::RedisDB->mget('mget_ns', qw(one two cats three four)), [qw(1 2), undef, qw(3 4)], 'could read keys via ->mget');
 done_testing;
