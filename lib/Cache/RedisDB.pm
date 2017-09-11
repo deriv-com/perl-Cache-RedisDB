@@ -2,7 +2,7 @@ package Cache::RedisDB;
 
 use 5.010;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use Carp;
 use RedisDB 2.14;
 use Sereal qw(looks_like_sereal);
