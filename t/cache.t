@@ -78,14 +78,14 @@ isnt $new_cache, $cache, "Got new cache object";
 ok(Cache::RedisDB->set("Test", "TTL", "I will expire", 60), "Set TTL test key for 60 second expiration.");
 is(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
 is(Cache::RedisDB->ttl("Test", "key1"), 0, "Unexpiring key Test::key1 appears to expire now.");
-eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "key1"], "Got correct list for keys in Test namespace");
+eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "key1"], "Got correct arrayref for keys in Test namespace");
 is(Cache::RedisDB->del("Test", "key33", "key8", "key1"), 1, "Deleted Test::key1");
 is(Cache::RedisDB->get("Test", "key1"),     undef,                          "Got undef for Test::key1");
 is(Cache::RedisDB->get("",     "Testkey1"), "testvalue1",                   "Got testvalue1 for Testkey1");
 is(Cache::RedisDB->get("-",    "-"),        "-- it works! 它的工程！", "Got dash prefixed string");
 ok(Cache::RedisDB->set("Test", "Undef", undef), "Set undef");
 ok(Cache::RedisDB->set("Test", "Empty", ""),    "Set empty string");
-eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "Undef", "Empty"], "Got correct list for keys in Test namespace");
+eq_or_diff([sort @{Cache::RedisDB->keys("Test")}], [sort "TTL", "Undef", "Empty"], "Got correct arrayref for keys in Test namespace");
 is(Cache::RedisDB->get("Test", "Undef"), undef, "Got undef");
 is(Cache::RedisDB->get("Test", "Empty"), "",    "Got empty string");
 
