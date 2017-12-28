@@ -4,7 +4,7 @@ use utf8;
 use Test::Most 0.22;
 use Test::FailWarnings;
 use DateTime;
-use JSON qw(from_json);
+use JSON::MaybeXS;
 use RedisServer;
 use Cache::RedisDB;
 use strict;
@@ -126,7 +126,7 @@ subtest 'JSON' => sub {
     SKIP: {
         skip 'Redis 2.6.12 or higher', 6 unless $sufficient_version;
         my $json_string = '{"should_be_true" : true, "should_be_false" : false}';
-        my $json_obj    = from_json($json_string);
+        my $json_obj    = JSON::MaybeXS->new->decode($json_string);
         ok($json_obj->{should_be_true},   'True is true');
         ok(!$json_obj->{should_be_false}, 'False is false');
         ok(Cache::RedisDB->set('Test', 'JSON', $json_obj), 'Stored JSON successfully');
