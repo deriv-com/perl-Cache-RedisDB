@@ -101,7 +101,7 @@ SKIP: {
       "Got hash from the cache"
     );
     my $now2 = Cache::RedisDB->get("Date", "Time");
-    eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
+    eq_or_diff [$now2->year, $now2->month, $now2->second, $now2->time_zone], \@now_exp, "Got correct Date::Time object from cache";
 
 }
 
