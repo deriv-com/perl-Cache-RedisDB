@@ -7,7 +7,7 @@ on configure => sub {
 };
 
 on test => sub {
-    requires 'DateTime';
+    requires 'Date::Utility';
     requires 'JSON::MaybeXS';
     requires 'Test::Differences', '0.61';
     requires 'Test::FailWarnings';

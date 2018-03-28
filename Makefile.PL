@@ -21,7 +21,7 @@ my %WriteMakefileArgs = (
     "Sereal" => 0
   },
   "TEST_REQUIRES" => {
-    "DateTime" => 0,
+    "Date::Utility" => 0,
     "ExtUtils::MakeMaker" => 0,
     "File::Spec" => 0,
     "IO::Handle" => 0,
