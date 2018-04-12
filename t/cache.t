@@ -3,7 +3,7 @@ use lib 't';
 use utf8;
 use Test::Most 0.22;
 use Test::FailWarnings;
-use DateTime;
+use Date::Utility;
 use JSON::MaybeXS;
 use RedisServer;
 use Cache::RedisDB;
@@ -36,8 +36,8 @@ my $cache2 = Cache::RedisDB->redis;
 is $cache2, $cache, "Got the same cache object";
 
 
-my $now = DateTime->now;
-my @now_exp = ($now->year, $now->month, $now->second, $now->time_zone);
+my $now = Date::Utility->new;
+my @now_exp = ($now->year, $now->month, $now->second, $now->timezone);
 
 if (fork) {
     wait;
@@ -61,7 +61,7 @@ if (fork) {
              ),
              "Set Hash::Ref"
         );
-        $child->ok(Cache::RedisDB->set("Date", "Time", $now), "Set Date::Time");
+        $child->ok(Cache::RedisDB->set("Date", "Utility", $now), "Set Date::Utility");
     }
     $child->is_eq(Cache::RedisDB->get("Test", "key1"), "value1", "Got value1 for Test::key1");
     $child->ok($child->is_passing, 'Child is passing, new test to track down concurrency issues');
@@ -100,8 +100,8 @@ SKIP: {
       },
       "Got hash from the cache"
     );
-    my $now2 = Cache::RedisDB->get("Date", "Time");
-    eq_or_diff [$now->year, $now->month, $now->second, $now->time_zone], \@now_exp, "Got correct Date::Time object from cache";
+    my $now2 = Cache::RedisDB->get("Date", "Utility");
+    eq_or_diff [$now2->year, $now2->month, $now2->second, $now2->timezone], \@now_exp, "Got correct Date::Time object from cache";
 
 }
 
