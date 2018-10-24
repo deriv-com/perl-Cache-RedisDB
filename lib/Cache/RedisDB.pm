@@ -68,12 +68,14 @@ sub redis_connection {
 
 =head2 redis
 
-Returns a singleton L<RedisDB> instance.
+Returns (or sets) a singleton L<RedisDB> instance.
 
 =cut
 
 sub redis {
+    my $connection = $_[-1];
     state $redis;
+    $redis = $connection if defined $connection;
     $redis //= redis_connection();
     return $redis;
 }
