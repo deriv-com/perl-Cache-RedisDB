@@ -8,7 +8,7 @@ alias:
     run: 
       name: Install dzil author dependencies
       command: |
-        cpm install -g \
+        cpm install --no-test -g \
         -w 2 \
         --mirror=http://cpan.cpantesters.org/ $(dzil authordeps --missing)
   - &install_deps
@@ -17,7 +17,7 @@ alias:
       command: |
         # see https://github.com/team-at-cpan/Dist-Zilla-Plugin-PodInherit/issues/1 to check why we not use 
         # dzil listdeps --missing directly here
-        cpanm --installdeps .
+        cpanm -n --installdeps .
         dzil listdeps --author --missing --cpanm-versions | xargs cpanm -n
  
 jobs:
