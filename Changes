@@ -1,6 +1,8 @@
 Revision history for Cache-RedisDB
 
 {{$NEXT}}
+
+0.13      2022-10-25 06:27:44+00:00 UTC
     - add mget
 
 0.12      2017-02-20 01:59:11+00:00 UTC
